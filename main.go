@@ -11,10 +11,8 @@ import (
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	response := fortune.GetResponse()
-
 	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(response)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -34,8 +32,7 @@ func main() {
 	port := getPort()
 	http.HandleFunc("/", handler)
 
-	err := http.ListenAndServe(":"+port, nil)
-	if err != nil {
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
