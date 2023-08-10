@@ -1,8 +1,11 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"text/template"
 )
 
@@ -35,10 +38,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	// HTTPハンドラを設定する
+	flag.Parse()
+	args := flag.Args()
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, "Usage: omikuji <port>")
+		os.Exit(1)
+	}
 	http.HandleFunc("/", handler)
 
 	// HTTPサーバを起動する
-	http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":"+args[0], nil)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
