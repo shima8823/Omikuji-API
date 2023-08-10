@@ -33,24 +33,27 @@ var currentTime = func() time.Time {
 	return time.Now()
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	var fortune string
-
+func getFortune() string {
 	now := currentTime()
 	if now.Month() == 1 && (1 <= now.Day() && now.Day() <= 3) {
-		fortune = "Dai-kichi"
-	} else {
-		fortune = fortunes[rand.Intn(len(fortunes))]
+		return "Dai-kichi"
 	}
+	return fortunes[rand.Intn(len(fortunes))]
+}
 
-	response := Response{
-		Fortune:   fortune,
+func getResponse() Response {
+	return Response{
+		Fortune:   getFortune(),
 		Health:    "You will fully recover, but stay attentive after you do.",
 		Residence: "You will have good fortune with a new house.",
 		Travel:    "When traveling, you may find something to treasure.",
 		Study:     "Things will be better. It may be worth aiming for a school in a different area.",
 		Love:      "The person you are looking for is very close to you.",
 	}
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	response := getResponse()
 
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(response)
@@ -60,16 +63,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+func getPort() string {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, "Usage: omikuji <port>")
 		os.Exit(1)
 	}
+	return args[0]
+}
+
+func main() {
+	port := getPort()
 	http.HandleFunc("/", handler)
 
-	err := http.ListenAndServe(":"+args[0], nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
