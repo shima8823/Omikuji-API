@@ -1,40 +1,63 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
 	"os"
-	"text/template"
+	"time"
 )
 
-type data struct {
-	Name   string
-	Result string
+var fortunes = []string{
+	"Dai-kichi",
+	"Kichi",
+	"Chuu-kichi",
+	"Sho-kichi",
+	"Sue-kichi",
+	"Kyo",
+	"Dai-kyo",
 }
 
-// おみくじの結果を保持するスライス
-var results = []string{
-	"大吉",
-	"中吉",
-	"小吉",
-	"吉",
-	"凶",
+type Response struct {
+	Fortune   string `json:"fortune"`
+	Health    string `json:"health"`
+	Residence string `json:"residence"`
+	Travel    string `json:"travel"`
+	Study     string `json:"study"`
+	Love      string `json:"love"`
 }
 
-var tmpl = template.Must(template.New("data").
-	Parse("<html><body>{{.Name}}さんの運勢は「<b>{{.Result}}</b>」です</body></html>"))
+var currentTime = func() time.Time {
+	return time.Now()
+}
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	// おみくじの結果をランダムに選ぶ
-	n := rand.Intn(len(results))
-	result := results[n]
-	data := data{
-		Name:   r.FormValue("p"),
-		Result: result,
+	var fortune string
+
+	now := currentTime()
+	if now.Month() == 1 && (1 <= now.Day() && now.Day() <= 3) {
+		fortune = "Dai-kichi"
+	} else {
+		fortune = fortunes[rand.Intn(len(fortunes))]
 	}
-	tmpl.Execute(w, data)
+
+	response := Response{
+		Fortune:   fortune,
+		Health:    "You will fully recover, but stay attentive after you do.",
+		Residence: "You will have good fortune with a new house.",
+		Travel:    "When traveling, you may find something to treasure.",
+		Study:     "Things will be better. It may be worth aiming for a school in a different area.",
+		Love:      "The person you are looking for is very close to you.",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func main() {
@@ -46,7 +69,6 @@ func main() {
 	}
 	http.HandleFunc("/", handler)
 
-	// HTTPサーバを起動する
 	err := http.ListenAndServe(":"+args[0], nil)
 	if err != nil {
 		fmt.Println(err)
