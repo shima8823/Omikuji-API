@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	response := fortune.GetResponse()
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -30,7 +30,7 @@ func getPort() string {
 
 func main() {
 	port := getPort()
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", Handler)
 
 	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		fmt.Println(err)
