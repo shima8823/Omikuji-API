@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var fortunes = []string{
+var Fortunes = []string{
 	"Dai-kichi",
 	"Kichi",
 	"Chuu-kichi",
@@ -33,7 +33,7 @@ func GetFortune() string {
 	if now.Month() == 1 && (1 <= now.Day() && now.Day() <= 3) {
 		return "Dai-kichi"
 	}
-	return fortunes[rand.Intn(len(fortunes))]
+	return Fortunes[rand.Intn(len(Fortunes))]
 }
 
 func GetResponse() Response {
